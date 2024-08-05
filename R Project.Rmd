@@ -1,0 +1,118 @@
+```{r}
+titanic <- read.csv('train.csv', na.strings = c("", "NA")) %>%
+  group_by(Transported, HomePlanet) %>%
+    summarize( 
+    count = n(),
+    Average_Age = mean(Age, na.rm = TRUE),
+    Room_Service = mean(RoomService, na.rm = TRUE),
+    Food_Court = mean(FoodCourt, na.rm = TRUE),
+    Shopping_Mall = mean(ShoppingMall, na.rm = TRUE),
+    Spa = mean(Spa, na.rm = TRUE),
+    VRDeck = mean(VRDeck, na.rm = TRUE)
+  ) %>%
+  filter(count > 200)
+View(titanic)
+```
+```{r}
+titanics <- read.csv('train.csv', na.strings = c("", "NA"))
+View(titanics)
+```
+
+```{r}
+no_nas <- titanics %>%
+  filter(!is.na(HomePlanet), !is.na(VIP), !is.na(Transported))
+```
+
+```{r}
+new_df <- no_nas[no_nas$CryoSleep=='False',] %>% filter(!is.na(HomePlanet), !is.na(VIP), !is.na(Transported))
+View(new_df)
+```
+
+
+```{r}
+RoomService_plot <- ggplot(new_df) +
+  geom_point(aes(x = Age, y = RoomService, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 3) +
+  coord_cartesian(ylim = c(0, 5000))
+
+RoomService_plot
+```
+```{r}
+FoodCourt_plot <- ggplot(new_df) +
+  geom_point(aes(x = Age, y = FoodCourt, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 3) +
+  coord_cartesian(ylim = c(0, 10000))
+
+FoodCourt_plot
+```
+
+```{r}
+Shopping_plot <- ggplot(new_df) +
+  geom_point(aes(x = Age, y = ShoppingMall, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 5) +
+  coord_cartesian(xlim = c(15, 75), ylim = c(0, 10000))
+
+Shopping_plot
+```
+
+```{r}
+Spa_plot <- ggplot(new_df) +
+  geom_point(aes(x = Age, y = Spa, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 3) +
+  coord_cartesian(ylim = c(0, 2000))
+
+Spa_plot
+```
+
+```{r}
+VR_plot <- ggplot(new_df) +
+  geom_point(aes(x = Age, y = VRDeck, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 3) +
+  coord_cartesian(ylim = c(0, 5000))
+
+VR_plot
+```
+```{r}
+no_nas_new <- mutate(new_df, TotalSpent = rowSums(select(new_df, c(RoomService, FoodCourt, ShoppingMall, Spa, VRDeck)), na.rm = TRUE))
+View(no_nas_new)
+```
+
+```{r}
+TotalSpent_plot <- ggplot(no_nas_new) +
+  geom_point(aes(x = Age, y = TotalSpent, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 3) +
+  coord_cartesian(ylim = c(0, 15000))
+
+TotalSpent_plot
+```
+```{r}
+filtered_plot <- no_nas_new %>%
+  filter(TotalSpent > 3000)
+TotalSpent_plot2 <- ggplot(filtered_plot) +
+  geom_point(aes(x = Age, y = TotalSpent, color = Transported)) +
+  facet_wrap(~ HomePlanet, nrow = 3) +
+  coord_cartesian(ylim = c(0, 30000))
+
+TotalSpent_plot2
+```
+
+```{r}
+df <- no_nas_new %>% filter(!is.na(Destination), !is.na(Cabin))
+View(df)
+```
+
+```{r}
+RS <- ggplot(data = df, mapping = aes(x = Age, y = RoomService, linetype = Transported)) +
+  geom_point(aes(color = Destination)) +
+  geom_smooth(se = FALSE)
+
+RS
+```
+```{r}
+TS <- ggplot(data = df, mapping = aes(x = Age, y = TotalSpent, linetype = HomePlanet)) +
+  geom_point(aes(color = Destination)) +
+  geom_smooth(se = TRUE)
+
+TS
+```
+
